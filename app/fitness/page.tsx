@@ -2,6 +2,14 @@
 
 import { useState } from 'react';
 
+interface Ring {
+  name: string;
+  current: number;
+  goal: number;
+  color: string;
+  icon: string;
+}
+
 export default function FitnessPage() {
   const [connected, setConnected] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -10,7 +18,14 @@ export default function FitnessPage() {
     steps: 0,
     calories: 0,
     heartRate: 0,
+    timestamp: new Date().toISOString(),
   });
+  
+  const [rings, setRings] = useState<Ring[]>([
+    { name: 'Move', current: 645, goal: 700, color: '#FF6B6B', icon: '🔴' },
+    { name: 'Exercise', current: 28, goal: 30, color: '#4ECDC4', icon: '💪' },
+    { name: 'Stand', current: 9, goal: 12, color: '#95E1D3', icon: '🧍' },
+  ]);
 
   const handleConnect = async () => {
     setConnected(true);
@@ -22,6 +37,12 @@ export default function FitnessPage() {
       const res = await fetch('/api/fitness/apple-watch');
       const newData = await res.json();
       setData(newData);
+      
+      // Update rings with simulated data
+      setRings(rings.map(ring => ({
+        ...ring,
+        current: Math.min(ring.goal, ring.current + Math.floor(Math.random() * 50))
+      })));
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {
@@ -31,7 +52,7 @@ export default function FitnessPage() {
 
   return (
     <main style={{
-      maxWidth: '800px',
+      maxWidth: '1000px',
       margin: '0 auto',
       padding: '2rem',
     }}>
@@ -56,31 +77,149 @@ export default function FitnessPage() {
               checked={connected}
               onChange={(e) => setConnected(e.target.checked)}
             />
-            {connected ? '✅ Connected' : '❌ Not Connected'}
+            {connected ? '✅ Connected to Apple Watch' : '❌ Not Connected'}
           </label>
         </div>
 
-        <button
-          onClick={handleConnect}
-          style={{
-            marginRight: '1rem',
-            backgroundColor: connected ? '#666' : '#000',
-          }}
-          disabled={connected}
-        >
-          {connected ? '🔗 Connected' : '🔗 Connect'}
-        </button>
-        <button
-          onClick={handleSync}
-          disabled={!connected || syncing}
-          style={{
-            backgroundColor: syncing ? '#666' : '#000',
-          }}
-        >
-          {syncing ? '⏳ Syncing...' : '🔄 Sync Now'}
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <button
+            onClick={handleConnect}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: connected ? '#999' : '#7C3AED',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: connected ? 'default' : 'pointer',
+              fontWeight: 'bold',
+            }}
+            disabled={connected}
+          >
+            {connected ? '🔗 Connected' : '🔗 Connect Apple Watch'}
+          </button>
+          <button
+            onClick={handleSync}
+            disabled={!connected || syncing}
+            style={{
+              padding: '0.75rem 1.5rem',
+              backgroundColor: syncing ? '#999' : '#7C3AED',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '0.5rem',
+              cursor: !connected || syncing ? 'default' : 'pointer',
+              fontWeight: 'bold',
+            }}
+          >
+            {syncing ? '⏳ Syncing...' : '🔄 Sync Now'}
+          </button>
+        </div>
       </div>
 
+      <h3 style={{ marginBottom: '1.5rem' }}>⚡ Activity Rings</h3>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '2rem',
+      }}>
+        {rings.map((ring, index) => {
+          const percentage = (ring.current / ring.goal) * 100;
+          const circumference = 2 * Math.PI * 45;
+          const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+          return (
+            <div
+              key={index}
+              style={{
+                backgroundColor: '#fff',
+                padding: '1.5rem',
+                borderRadius: '1rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{
+                position: 'relative',
+                width: '120px',
+                height: '120px',
+                margin: '0 auto 1rem',
+              }}>
+                <svg
+                  width="120"
+                  height="120"
+                  style={{
+                    transform: 'rotate(-90deg)',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                  }}
+                >
+                  {/* Background circle */}
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="45"
+                    fill="none"
+                    stroke="#eee"
+                    strokeWidth="8"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="60"
+                    cy="60"
+                    r="45"
+                    fill="none"
+                    stroke={ring.color}
+                    strokeWidth="8"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                    style={{
+                      transition: 'stroke-dashoffset 0.5s ease',
+                    }}
+                  />
+                </svg>
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <p style={{ margin: 0, fontSize: '1.8rem' }}>{ring.icon}</p>
+                  <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem', color: '#666' }}>
+                    {Math.round(percentage)}%
+                  </p>
+                </div>
+              </div>
+
+              <h4 style={{ marginBottom: '0.5rem' }}>{ring.name}</h4>
+              <p style={{ color: '#666', marginBottom: '0.5rem', fontSize: '0.9rem' }}>
+                {ring.current} / {ring.goal} {ring.name === 'Exercise' ? 'min' : ''}
+              </p>
+              <div style={{
+                backgroundColor: '#f5f5f5',
+                height: '4px',
+                borderRadius: '2px',
+                overflow: 'hidden',
+              }}>
+                <div
+                  style={{
+                    backgroundColor: ring.color,
+                    height: '100%',
+                    width: `${Math.min(percentage, 100)}%`,
+                    transition: 'width 0.3s ease',
+                  }}
+                ></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <h3 style={{ marginBottom: '1.5rem' }}>📊 Fitness Metrics</h3>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -88,31 +227,37 @@ export default function FitnessPage() {
         marginBottom: '2rem',
       }}>
         <div style={{
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#FF6B6B',
+          color: '#fff',
           padding: '1.5rem',
           borderRadius: '0.75rem',
           textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(255,107,107,0.3)',
         }}>
-          <h3 style={{ color: '#666', marginBottom: '0.5rem' }}>Steps</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{data.steps}</p>
+          <h3 style={{ color: '#fff', marginBottom: '0.5rem' }}>Steps</h3>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{data.steps.toLocaleString()}</p>
         </div>
         <div style={{
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#F9A825',
+          color: '#fff',
           padding: '1.5rem',
           borderRadius: '0.75rem',
           textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(249,168,37,0.3)',
         }}>
-          <h3 style={{ color: '#666', marginBottom: '0.5rem' }}>Calories</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{data.calories}</p>
+          <h3 style={{ color: '#fff', marginBottom: '0.5rem' }}>Calories</h3>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{data.calories}</p>
         </div>
         <div style={{
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#4ECDC4',
+          color: '#fff',
           padding: '1.5rem',
           borderRadius: '0.75rem',
           textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(78,205,196,0.3)',
         }}>
-          <h3 style={{ color: '#666', marginBottom: '0.5rem' }}>Heart Rate</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{data.heartRate} BPM</p>
+          <h3 style={{ color: '#fff', marginBottom: '0.5rem' }}>Heart Rate</h3>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>{data.heartRate} BPM</p>
         </div>
       </div>
 
@@ -127,15 +272,16 @@ export default function FitnessPage() {
           alignItems: 'center',
           gap: '0.5rem',
           cursor: 'pointer',
+          marginBottom: '1rem',
         }}>
           <input
             type="checkbox"
             checked={autoSync}
             onChange={(e) => setAutoSync(e.target.checked)}
           />
-          Auto-sync every 5 minutes
+          <span style={{ fontWeight: '500' }}>Auto-sync every 5 minutes</span>
         </label>
-        {autoSync && <p style={{ marginTop: '1rem', color: '#666' }}>✅ Auto-sync enabled</p>}
+        {autoSync && <p style={{ marginTop: '1rem', color: '#7C3AED', fontWeight: 'bold' }}>✅ Auto-sync enabled</p>}
       </div>
     </main>
   );
