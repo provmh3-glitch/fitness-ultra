@@ -593,8 +593,8 @@ export default function WorkoutsPage() {
           onClick={() => setView('plans')}
           style={{
             padding: '0.75rem 1.5rem',
-            backgroundColor: view === 'plans' ? '#7C3AED' : '#ddd',
-            color: view === 'plans' ? '#fff' : '#333',
+            backgroundColor: view === 'plans' ? '#E9D5FF' : '#ddd',
+            color: '#000',
             border: 'none',
             borderRadius: '0.5rem',
             cursor: 'pointer',
@@ -607,8 +607,8 @@ export default function WorkoutsPage() {
           onClick={() => setView('history')}
           style={{
             padding: '0.75rem 1.5rem',
-            backgroundColor: view === 'history' ? '#7C3AED' : '#ddd',
-            color: view === 'history' ? '#fff' : '#333',
+            backgroundColor: view === 'history' ? '#E9D5FF' : '#ddd',
+            color: '#000',
             border: 'none',
             borderRadius: '0.5rem',
             cursor: 'pointer',
