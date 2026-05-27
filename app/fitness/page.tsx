@@ -34,6 +34,10 @@ export default function FitnessPage() {
     return is16Bit ? value.getUint16(1, true) : value.getUint8(1);
   };
 
+  // Platform detection for iOS Safari (Web Bluetooth not supported)
+  const isIOS = typeof navigator !== 'undefined' && /iP(hone|od|ad)/i.test(navigator.userAgent || '');
+  const webBluetoothAvailable = typeof navigator !== 'undefined' && !!(navigator as any).bluetooth;
+
   const handleConnect = async () => {
     if (typeof navigator === 'undefined' || !(navigator as any).bluetooth) {
       setStatusMessage('Web Bluetooth is not supported in this browser.');
@@ -144,6 +148,12 @@ export default function FitnessPage() {
             {connected ? '✅ Connected to Apple Watch' : '❌ Not Connected'}
           </label>
         </div>
+
+        {isIOS && !webBluetoothAvailable && (
+          <div style={{ marginBottom: '1rem', padding: '0.8rem', borderRadius: '10px', background: '#FFFBEB', color: '#92400E', fontWeight: 600 }}>
+            Note: Safari on iPhone does not support Web Bluetooth. Use the <strong>Sync Now</strong> button to sync via our server endpoint or install the native iOS companion app for direct watch pairing.
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <button

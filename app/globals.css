@@ -121,6 +121,8 @@ ul { padding-left: 0; }
   .card { padding: 1.25rem; }
 }
 
+.warning-banner { margin-bottom: 1rem; padding: 0.8rem; border-radius: 10px; background: #FFFBEB; color: #92400E; font-weight: 600; }
+
 /* subtle entrance animation */
 @keyframes popIn { from { opacity: 0; transform: translateY(6px) scale(0.995);} to { opacity:1; transform: translateY(0) scale(1);} }
 .pop-in { animation: popIn 260ms ease both; }

@@ -374,6 +374,9 @@ export default function WorkoutsPage() {
   const [bluetoothConnected, setBluetoothConnected] = useState(false);
   const [bluetoothMessage, setBluetoothMessage] = useState('Ready to connect your Apple Watch.');
   const [watchHeartRate, setWatchHeartRate] = useState<number | null>(null);
+  // Platform detection for iOS Safari (Web Bluetooth not supported)
+  const isIOS = typeof navigator !== 'undefined' && /iP(hone|od|ad)/i.test(navigator.userAgent || '');
+  const webBluetoothAvailable = typeof navigator !== 'undefined' && !!(navigator as any).bluetooth;
 
   const colors: { [key: string]: string } = {
     'Weight Loss': '#FF6B6B',
@@ -794,6 +797,11 @@ export default function WorkoutsPage() {
               {bluetoothMessage}
               {watchHeartRate ? ` • ${watchHeartRate} BPM` : ''}
             </div>
+            {isIOS && !webBluetoothAvailable && (
+              <div style={{ marginTop: '0.5rem', padding: '0.6rem', borderRadius: '10px', background: '#FFFBEB', color: '#92400E', fontWeight: 600 }}>
+                Note: iPhone Safari does not support Web Bluetooth. Use "Sync from Apple Watch" to sync via our server endpoint or use the iOS companion app.
+              </div>
+            )}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', flex: 1 }}>
               <input
                 placeholder="Workout type"
