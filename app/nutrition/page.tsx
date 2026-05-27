@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Meal {
   name: string;
@@ -167,6 +167,7 @@ const nutritionPlans: { [key: string]: NutritionPlan } = {
 
 export default function NutritionPage() {
   const [selectedPlan, setSelectedPlan] = useState('Balanced');
+  const [savedGoal, setSavedGoal] = useState('Balanced');
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [customization, setCustomization] = useState({
     dairyFree: false,
@@ -177,6 +178,17 @@ export default function NutritionPage() {
 
   const plan = nutritionPlans[selectedPlan];
   const mealColors = ['#FFB6C1', '#87CEEB', '#FFD700', '#90EE90', '#DDA0DD', '#F0E68C'];
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('fitnessUltraBodyComposition') : null;
+    if (stored) {
+      const bodyComp = JSON.parse(stored) as { goal: string };
+      setSavedGoal(bodyComp.goal);
+      if (nutritionPlans[bodyComp.goal]) {
+        setSelectedPlan(bodyComp.goal);
+      }
+    }
+  }, []);
 
   const toggleMeal = (mealName: string) => {
     setSelectedMeals(prev =>
@@ -218,6 +230,9 @@ export default function NutritionPage() {
         marginBottom: '2rem',
       }}>
         <div>
+          <p style={{ marginBottom: '1rem', color: '#6B7280' }}>
+            Tailoring this plan for your saved goal: <strong>{savedGoal}</strong>
+          </p>
           <h3 style={{ marginBottom: '1rem' }}>Select Your Plan</h3>
           <div style={{
             display: 'grid',

@@ -14,36 +14,33 @@ export default function Home() {
           Complete fitness tracking with Apple Watch integration, personalized workouts, custom nutrition plans, and real-time weather
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <a href="/fitness" style={{
+          <a href="/fitness" className="homeLink" style={{
             padding: '1rem 2rem',
             backgroundColor: '#7C3AED',
             color: '#fff',
             textDecoration: 'none',
             borderRadius: '0.5rem',
             fontWeight: 'bold',
-            transition: 'all 0.3s',
           }}>
             🏃 Fitness Tracking
           </a>
-          <a href="/workouts" style={{
+          <a href="/workouts" className="homeLink" style={{
             padding: '1rem 2rem',
             backgroundColor: '#7C3AED',
             color: '#fff',
             textDecoration: 'none',
             borderRadius: '0.5rem',
             fontWeight: 'bold',
-            transition: 'all 0.3s',
           }}>
             📅 Workout Plans
           </a>
-          <a href="/nutrition" style={{
+          <a href="/nutrition" className="homeLink" style={{
             padding: '1rem 2rem',
             backgroundColor: '#7C3AED',
             color: '#fff',
             textDecoration: 'none',
             borderRadius: '0.5rem',
             fontWeight: 'bold',
-            transition: 'all 0.3s',
           }}>
             🍎 Nutrition
           </a>
@@ -56,122 +53,67 @@ export default function Home() {
         gap: '2rem',
         marginTop: '3rem',
       }}>
-        <a href="/fitness" style={{
+        <a href="/fitness" className="featureCard" style={{
           padding: '2rem',
           backgroundColor: '#FF6B6B',
           borderRadius: '1rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           textDecoration: 'none',
           color: '#fff',
-          transition: 'all 0.3s',
           cursor: 'pointer',
           border: '2px solid transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.borderColor = '#7C3AED';
-          e.currentTarget.style.boxShadow = '0 8px 20px rgba(124,58,237,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = 'transparent';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}>
           <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>🏃 Apple Watch Sync</h3>
           <p>Connect your Apple Watch and sync your fitness data in real-time. Track steps, calories, heart rate, and Activity Rings.</p>
         </a>
-        <a href="/workouts" style={{
+        <a href="/workouts" className="featureCard" style={{
           padding: '2rem',
           backgroundColor: '#4ECDC4',
           borderRadius: '1rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           textDecoration: 'none',
           color: '#fff',
-          transition: 'all 0.3s',
           cursor: 'pointer',
           border: '2px solid transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.borderColor = '#7C3AED';
-          e.currentTarget.style.boxShadow = '0 8px 20px rgba(124,58,237,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = 'transparent';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}>
           <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>📅 Workout Plans</h3>
           <p>Goal-based weekly workout plans designed for weight loss, muscle gain, endurance building, and flexibility improvement.</p>
         </a>
-        <a href="/nutrition" style={{
+        <a href="/nutrition" className="featureCard" style={{
           padding: '2rem',
           backgroundColor: '#F9A825',
           borderRadius: '1rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           textDecoration: 'none',
           color: '#fff',
-          transition: 'all 0.3s',
           cursor: 'pointer',
           border: '2px solid transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.borderColor = '#7C3AED';
-          e.currentTarget.style.boxShadow = '0 8px 20px rgba(124,58,237,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = 'transparent';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}>
           <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>🍎 Nutrition Plans</h3>
           <p>Customizable meal plans with macro tracking. Choose from weight loss, muscle gain, balanced, or vegan options.</p>
         </a>
-        <a href="/workouts" style={{
+        <a href="/workouts" className="featureCard" style={{
           padding: '2rem',
           backgroundColor: '#A78BFA',
           borderRadius: '1rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           textDecoration: 'none',
           color: '#fff',
-          transition: 'all 0.3s',
           cursor: 'pointer',
           border: '2px solid transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.borderColor = '#7C3AED';
-          e.currentTarget.style.boxShadow = '0 8px 20px rgba(124,58,237,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = 'transparent';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}>
           <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>📊 Workout History</h3>
           <p>View and track all your completed workouts. Monitor your progress over time with detailed exercise logs.</p>
         </a>
-        <a href="/weather" style={{
+        <a href="/weather" className="featureCard" style={{
           padding: '2rem',
           backgroundColor: '#38B6FF',
           borderRadius: '1rem',
           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           textDecoration: 'none',
           color: '#fff',
-          transition: 'all 0.3s',
           cursor: 'pointer',
           border: '2px solid transparent',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.borderColor = '#7C3AED';
-          e.currentTarget.style.boxShadow = '0 8px 20px rgba(124,58,237,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.borderColor = 'transparent';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
         }}>
           <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>🌤️ Weather Search</h3>
           <p>Get accurate weather forecasts for any city. Plan your outdoor workouts based on real-time weather data.</p>

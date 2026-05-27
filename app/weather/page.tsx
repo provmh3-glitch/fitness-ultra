@@ -80,7 +80,7 @@ export default function WeatherPage() {
           }}>
             <div>
               <p style={{ color: '#666', marginBottom: '0.5rem' }}>Temperature</p>
-              <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{weather.temperature}°C</p>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{weather.temperature}°F</p>
             </div>
             <div>
               <p style={{ color: '#666', marginBottom: '0.5rem' }}>Condition</p>
@@ -92,7 +92,7 @@ export default function WeatherPage() {
             </div>
             <div>
               <p style={{ color: '#666', marginBottom: '0.5rem' }}>Wind Speed</p>
-              <p style={{ fontSize: '1.2rem' }}>{weather.windSpeed} km/h</p>
+              <p style={{ fontSize: '1.2rem' }}>{weather.windSpeed} mph</p>
             </div>
           </div>
         </div>

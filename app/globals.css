@@ -42,3 +42,31 @@ input:focus {
   border-color: #000;
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
+
+.navLink {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.navLink:hover {
+  color: #7C3AED;
+}
+.homeLink {
+  transition: transform 0.3s, background-color 0.3s;
+}
+
+.homeLink:hover {
+  transform: translateY(-2px);
+  background-color: #5B21B6;
+}
+
+.featureCard {
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.featureCard:hover {
+  transform: translateY(-4px);
+  border-color: #7C3AED;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.3);
+}

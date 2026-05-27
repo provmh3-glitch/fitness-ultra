@@ -27,11 +27,12 @@ export default function RootLayout({
             ⚡ Fitness Ultra
           </h1>
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-            <a href="/" style={{ color: '#fff', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#7C3AED'} onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}>Home</a>
-            <a href="/fitness" style={{ color: '#fff', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#7C3AED'} onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}>🏃 Fitness</a>
-            <a href="/workouts" style={{ color: '#fff', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#7C3AED'} onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}>📅 Workouts</a>
-            <a href="/nutrition" style={{ color: '#fff', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#7C3AED'} onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}>🍎 Nutrition</a>
-            <a href="/weather" style={{ color: '#fff', textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#7C3AED'} onMouseLeave={(e) => e.currentTarget.style.color = '#fff'}>🌤️ Weather</a>
+            <a href="/" className="navLink">Home</a>
+            <a href="/goals" className="navLink">🎯 Goals</a>
+            <a href="/fitness" className="navLink">🏃 Fitness</a>
+            <a href="/workouts" className="navLink">📅 Workouts</a>
+            <a href="/nutrition" className="navLink">🍎 Nutrition</a>
+            <a href="/weather" className="navLink">🌤️ Weather</a>
           </div>
         </nav>
         {children}
