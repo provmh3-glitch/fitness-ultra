@@ -12,6 +12,12 @@
   --primary: #000000;
 }
 
+html, body {
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Roboto', 'Helvetica Neue', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -96,8 +102,24 @@ input:focus, textarea:focus, select:focus {
 /* safe area for iOS */
 body { padding-bottom: env(safe-area-inset-bottom); }
 
+main { min-width: 0; width: 100%; }
+
 /* improve lists */
 ul { padding-left: 0; }
+
+.app-header { justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; }
+.app-header > div:last-child { display: flex; flex-wrap: wrap; gap: 0.85rem; }
+
+@media (max-width: 840px) {
+  .app-header { padding: 1rem; }
+  .app-header .navLink { font-size: 0.95rem; }
+  .hero-hero { grid-template-columns: 1fr !important; }
+  .hero-hero > div { min-width: 0; }
+  .homeLink { min-width: 0 !important; }
+  .homeLink, .featureCard { width: 100%; }
+  .featureCard { padding: 1.5rem; }
+  .card { padding: 1.25rem; }
+}
 
 /* subtle entrance animation */
 @keyframes popIn { from { opacity: 0; transform: translateY(6px) scale(0.995);} to { opacity:1; transform: translateY(0) scale(1);} }

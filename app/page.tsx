@@ -7,7 +7,7 @@ export default function Home() {
       margin: '0 auto',
       padding: '3rem 2rem',
     }}>
-      <section style={{
+      <section className="hero-hero" style={{
         display: 'grid',
         gridTemplateColumns: '1.2fr 1fr',
         gap: '2rem',
