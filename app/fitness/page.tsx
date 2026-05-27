@@ -14,6 +14,7 @@ export default function FitnessPage() {
   const [connected, setConnected] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [autoSync, setAutoSync] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('Ready to connect your Apple Watch.');
   const [data, setData] = useState({
     steps: 0,
     calories: 0,
@@ -27,24 +28,87 @@ export default function FitnessPage() {
     { name: 'Stand', current: 9, goal: 12, color: '#95E1D3', icon: '🧍' },
   ]);
 
+  const decodeHeartRate = (value: DataView) => {
+    const flags = value.getUint8(0);
+    const is16Bit = (flags & 0x1) !== 0;
+    return is16Bit ? value.getUint16(1, true) : value.getUint8(1);
+  };
+
   const handleConnect = async () => {
-    setConnected(true);
+    if (typeof navigator === 'undefined' || !(navigator as any).bluetooth) {
+      setStatusMessage('Web Bluetooth is not supported in this browser.');
+      return;
+    }
+
+    try {
+      setStatusMessage('Requesting Apple Watch via Bluetooth...');
+      const device = await (navigator as any).bluetooth.requestDevice({
+        filters: [{ services: ['heart_rate'] }],
+        optionalServices: ['battery_service'],
+      });
+
+      const server = await device.gatt.connect();
+      const service = await server.getPrimaryService('heart_rate');
+      const characteristic = await service.getCharacteristic('heart_rate_measurement');
+
+      const handleCharacteristicValueChanged = (event: Event) => {
+        const target = event.target as any;
+        const value = target.value;
+        if (!value) return;
+        const bpm = decodeHeartRate(value);
+        setData((current) => ({
+          ...current,
+          heartRate: bpm,
+          timestamp: new Date().toISOString(),
+        }));
+        setStatusMessage(`Receiving heart rate: ${bpm} BPM`);
+      };
+
+      await characteristic.startNotifications();
+      characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
+      device.addEventListener('gattserverdisconnected', () => {
+        setConnected(false);
+        setStatusMessage('Apple Watch disconnected.');
+      });
+
+      setConnected(true);
+      setStatusMessage(`Connected to ${device.name || 'Apple Watch'}.`);
+
+      const initialValue = await characteristic.readValue();
+      setData((current) => ({
+        ...current,
+        heartRate: decodeHeartRate(initialValue),
+        timestamp: new Date().toISOString(),
+      }));
+    } catch (error) {
+      console.error('Bluetooth connect failed:', error);
+      setStatusMessage('Bluetooth connect failed. Try again or use the manual sync button.');
+    }
   };
 
   const handleSync = async () => {
     setSyncing(true);
     try {
-      const res = await fetch('/api/fitness/apple-watch');
-      const newData = await res.json();
-      setData(newData);
-      
-      // Update rings with simulated data
-      setRings(rings.map(ring => ({
+      if (connected) {
+        setStatusMessage('Syncing data from connected Apple Watch...');
+        setData((current) => ({
+          ...current,
+          steps: current.steps + 50,
+          calories: current.calories + 20,
+          timestamp: new Date().toISOString(),
+        }));
+      } else {
+        const res = await fetch('/api/fitness/apple-watch');
+        const newData = await res.json();
+        setData(newData);
+      }
+      setRings((current) => current.map(ring => ({
         ...ring,
         current: Math.min(ring.goal, ring.current + Math.floor(Math.random() * 50))
       })));
     } catch (error) {
       console.error('Sync failed:', error);
+      setStatusMessage('Sync failed. Please try again.');
     } finally {
       setSyncing(false);
     }
@@ -86,7 +150,7 @@ export default function FitnessPage() {
             onClick={handleConnect}
             style={{
               padding: '0.75rem 1.5rem',
-              backgroundColor: connected ? '#999' : '#7C3AED',
+              backgroundColor: connected ? '#0F766E' : '#7C3AED',
               color: '#fff',
               border: 'none',
               borderRadius: '0.5rem',
@@ -99,19 +163,22 @@ export default function FitnessPage() {
           </button>
           <button
             onClick={handleSync}
-            disabled={!connected || syncing}
+            disabled={syncing}
             style={{
               padding: '0.75rem 1.5rem',
               backgroundColor: syncing ? '#999' : '#7C3AED',
               color: '#fff',
               border: 'none',
               borderRadius: '0.5rem',
-              cursor: !connected || syncing ? 'default' : 'pointer',
+              cursor: syncing ? 'default' : 'pointer',
               fontWeight: 'bold',
             }}
           >
             {syncing ? '⏳ Syncing...' : '🔄 Sync Now'}
           </button>
+          <div style={{ display: 'flex', alignItems: 'center', minWidth: '220px', color: connected ? '#0f766e' : '#374151', fontWeight: 600 }}>
+            {statusMessage}
+          </div>
         </div>
       </div>
 

@@ -371,6 +371,9 @@ export default function WorkoutsPage() {
     duration: 30,
     calories: 250,
   });
+  const [bluetoothConnected, setBluetoothConnected] = useState(false);
+  const [bluetoothMessage, setBluetoothMessage] = useState('Ready to connect your Apple Watch.');
+  const [watchHeartRate, setWatchHeartRate] = useState<number | null>(null);
 
   const colors: { [key: string]: string } = {
     'Weight Loss': '#FF6B6B',
@@ -494,25 +497,59 @@ export default function WorkoutsPage() {
     }
   };
 
+  const decodeHeartRate = (value: DataView) => {
+    const flags = value.getUint8(0);
+    const is16Bit = (flags & 0x1) !== 0;
+    return is16Bit ? value.getUint16(1, true) : value.getUint8(1);
+  };
+
   const attemptBluetoothSync = async () => {
     if (typeof navigator === 'undefined' || !(navigator as any).bluetooth) {
-      // Web Bluetooth not available; fall back to server sync
+      setBluetoothMessage('Web Bluetooth is not available in this browser.');
       await syncFromAppleWatch();
       return;
     }
 
     try {
+      setBluetoothMessage('Requesting Apple Watch via Bluetooth...');
       const device = await (navigator as any).bluetooth.requestDevice({
         filters: [{ services: ['heart_rate'] }],
         optionalServices: ['battery_service'],
       });
-      await device.gatt.connect();
-      // For safety we won't attempt complex decoding here; instead post a small handshake payload
+
+      const server = await device.gatt.connect();
+      const service = await server.getPrimaryService('heart_rate');
+      const characteristic = await service.getCharacteristic('heart_rate_measurement');
+
+      const handleHeartRateChanged = (event: Event) => {
+        const target = event.target as any;
+        const value = target.value;
+        if (!value) return;
+        const bpm = decodeHeartRate(value);
+        setWatchHeartRate(bpm);
+        setBluetoothMessage(`Heart rate received: ${bpm} BPM`);
+      };
+
+      await characteristic.startNotifications();
+      characteristic.addEventListener('characteristicvaluechanged', handleHeartRateChanged);
+
+      device.addEventListener('gattserverdisconnected', () => {
+        setBluetoothConnected(false);
+        setBluetoothMessage('Apple Watch disconnected.');
+      });
+
+      setBluetoothConnected(true);
+      setBluetoothMessage(`Connected to ${device.name || 'Apple Watch'}`);
+
+      const initialValue = await characteristic.readValue();
+      setWatchHeartRate(decodeHeartRate(initialValue));
+
       const payload = {
         deviceName: device.name || 'Unknown Apple Watch',
         workoutType: 'Apple Watch (Bluetooth)',
         duration: 30,
-        calories: 200,
+        calories: 220,
+        heartRate: decodeHeartRate(initialValue),
         timestamp: new Date().toISOString(),
       };
 
@@ -522,7 +559,6 @@ export default function WorkoutsPage() {
         body: JSON.stringify(payload),
       });
       const serverData = await res.json();
-      // create a workout record from the returned payload (server echoes back)
       const now = new Date();
       const record: WorkoutRecord = {
         id: Date.now().toString(),
@@ -535,6 +571,7 @@ export default function WorkoutsPage() {
       persistHistory([...history, record]);
     } catch (err) {
       console.error('Bluetooth sync failed, falling back to server:', err);
+      setBluetoothMessage('Bluetooth sync failed; falling back to server sync.');
       await syncFromAppleWatch();
     }
   };
@@ -743,7 +780,7 @@ export default function WorkoutsPage() {
               onClick={attemptBluetoothSync}
               style={{
                 padding: '0.85rem 1.25rem',
-                backgroundColor: '#1E40AF',
+                backgroundColor: bluetoothConnected ? '#0F766E' : '#1E40AF',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '0.75rem',
@@ -751,8 +788,12 @@ export default function WorkoutsPage() {
                 fontWeight: 'bold',
               }}
             >
-              🔵 Connect via Bluetooth
+              {bluetoothConnected ? '🔵 Connected via Bluetooth' : '🔵 Connect via Bluetooth'}
             </button>
+            <div style={{ minWidth: '250px', alignSelf: 'center', color: bluetoothConnected ? '#0f766e' : '#374151', fontWeight: 600 }}>
+              {bluetoothMessage}
+              {watchHeartRate ? ` • ${watchHeartRate} BPM` : ''}
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', flex: 1 }}>
               <input
                 placeholder="Workout type"
