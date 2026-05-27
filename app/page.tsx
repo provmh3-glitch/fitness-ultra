@@ -1,3 +1,5 @@
+import HeroVisual from './components/HeroVisual';
+
 export default function Home() {
   return (
     <main style={{
@@ -6,45 +8,46 @@ export default function Home() {
       padding: '3rem 2rem',
     }}>
       <section style={{
-        textAlign: 'center',
+        display: 'grid',
+        gridTemplateColumns: '1.2fr 1fr',
+        gap: '2rem',
+        alignItems: 'center',
         marginBottom: '4rem',
       }}>
-        <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚡ Fitness Ultra</h2>
-        <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '2rem' }}>
-          Complete fitness tracking with Apple Watch integration, personalized workouts, custom nutrition plans, and real-time weather
-        </p>
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <a href="/fitness" className="homeLink" style={{
-            padding: '1rem 2rem',
-            backgroundColor: '#7C3AED',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '0.5rem',
-            fontWeight: 'bold',
-          }}>
-            🏃 Fitness Tracking
-          </a>
-          <a href="/workouts" className="homeLink" style={{
-            padding: '1rem 2rem',
-            backgroundColor: '#7C3AED',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '0.5rem',
-            fontWeight: 'bold',
-          }}>
-            📅 Workout Plans
-          </a>
-          <a href="/nutrition" className="homeLink" style={{
-            padding: '1rem 2rem',
-            backgroundColor: '#7C3AED',
-            color: '#fff',
-            textDecoration: 'none',
-            borderRadius: '0.5rem',
-            fontWeight: 'bold',
-          }}>
-            🍎 Nutrition
-          </a>
+        <div>
+          <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚡ Fitness Ultra</h2>
+          <p style={{ fontSize: '1.2rem', color: '#666', marginBottom: '2rem', maxWidth: '660px', lineHeight: 1.75 }}>
+            Complete fitness tracking with Apple Watch integration, personalized workouts, custom nutrition plans, and real-time weather.
+          </p>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <a href="/fitness" className="homeLink" style={{
+              padding: '1rem 2rem',
+              backgroundColor: '#007aff',
+              color: '#fff',
+              textDecoration: 'none',
+              borderRadius: '999px',
+              fontWeight: '700',
+              minWidth: '170px',
+              textAlign: 'center',
+            }}>
+              🏃 Fitness Tracking
+            </a>
+            <a href="/workouts" className="homeLink" style={{
+              padding: '1rem 2rem',
+              backgroundColor: '#fff',
+              color: '#007aff',
+              textDecoration: 'none',
+              borderRadius: '999px',
+              fontWeight: '700',
+              minWidth: '170px',
+              textAlign: 'center',
+              border: '1px solid rgba(0,122,255,0.2)',
+            }}>
+              📅 Workout Plans
+            </a>
+          </div>
         </div>
+        <HeroVisual />
       </section>
 
       <section style={{

@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react';
 
+interface Exercise {
+  name: string;
+  sets?: number | string;
+  reps?: string;
+}
+
 interface Workout {
   day: string;
   type: string;
   duration: number;
   intensity: string;
   calories: number;
-  exercises: string[];
+  exercises: Array<string | Exercise>;
   reps?: string;
   sets?: string;
 }
@@ -355,6 +361,7 @@ export default function WorkoutsPage() {
   const [selectedPlan, setSelectedPlan] = useState('Weight Loss');
   const [view, setView] = useState<'plans' | 'history'>('plans');
   const [history, setHistory] = useState<WorkoutRecord[]>(sampleHistory);
+  const [plansState, setPlansState] = useState<{ [key: string]: Workout[] }>(workoutPlans);
   const [goalDetail, setGoalDetail] = useState<string>('Weighted workouts based on your current body composition.');
   const [newWorkout, setNewWorkout] = useState<WorkoutRecord>({
     id: '',
@@ -398,6 +405,14 @@ export default function WorkoutsPage() {
         setGoalDetail('A balanced plan with mixed strength and conditioning work.');
       }
     }
+    const storedPlans = typeof window !== 'undefined' ? window.localStorage.getItem('fitnessUltraPlans') : null;
+    if (storedPlans) {
+      try {
+        setPlansState(JSON.parse(storedPlans));
+      } catch (e) {
+        // ignore parse errors
+      }
+    }
   }, []);
 
   const persistHistory = (nextHistory: WorkoutRecord[]) => {
@@ -406,6 +421,45 @@ export default function WorkoutsPage() {
       window.localStorage.setItem('fitnessUltraWorkoutHistory', JSON.stringify(nextHistory));
     }
   };
+
+  const persistPlans = (nextPlans: { [key: string]: Workout[] }) => {
+    setPlansState(nextPlans);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('fitnessUltraPlans', JSON.stringify(nextPlans));
+    }
+  };
+
+  const [editing, setEditing] = useState<null | { plan: string; workoutIndex: number; exerciseIndex: number }>(null);
+  const [editValues, setEditValues] = useState<{ name: string; sets: string; reps: string }>({ name: '', sets: '', reps: '' });
+
+  const startEditExercise = (plan: string, workoutIndex: number, exerciseIndex: number) => {
+    const ex = plansState[plan][workoutIndex].exercises[exerciseIndex];
+    if (typeof ex === 'string') {
+      setEditValues({ name: ex, sets: '', reps: '' });
+    } else {
+      setEditValues({ name: ex.name, sets: String(ex.sets || ''), reps: ex.reps || '' });
+    }
+    setEditing({ plan, workoutIndex, exerciseIndex });
+  };
+
+  const saveEditExercise = () => {
+    if (!editing) return;
+    const { plan, workoutIndex, exerciseIndex } = editing;
+    const updated = { ...plansState };
+    const workouts = updated[plan].map((w) => ({ ...w }));
+    const target = { ...workouts[workoutIndex] } as Workout;
+    const exObj: Exercise = { name: editValues.name };
+    if (editValues.sets) exObj.sets = isNaN(Number(editValues.sets)) ? editValues.sets : Number(editValues.sets);
+    if (editValues.reps) exObj.reps = editValues.reps;
+    target.exercises = [...target.exercises];
+    target.exercises[exerciseIndex] = exObj;
+    workouts[workoutIndex] = target;
+    updated[plan] = workouts;
+    persistPlans(updated);
+    setEditing(null);
+  };
+
+  const cancelEditExercise = () => setEditing(null);
 
   const addWorkout = () => {
     if (!newWorkout.date || !newWorkout.time || !newWorkout.type) return;
@@ -437,6 +491,51 @@ export default function WorkoutsPage() {
       persistHistory([...history, record]);
     } catch (error) {
       console.error('Sync failed:', error);
+    }
+  };
+
+  const attemptBluetoothSync = async () => {
+    if (typeof navigator === 'undefined' || !(navigator as any).bluetooth) {
+      // Web Bluetooth not available; fall back to server sync
+      await syncFromAppleWatch();
+      return;
+    }
+
+    try {
+      const device = await (navigator as any).bluetooth.requestDevice({
+        filters: [{ services: ['heart_rate'] }],
+        optionalServices: ['battery_service'],
+      });
+      await device.gatt.connect();
+      // For safety we won't attempt complex decoding here; instead post a small handshake payload
+      const payload = {
+        deviceName: device.name || 'Unknown Apple Watch',
+        workoutType: 'Apple Watch (Bluetooth)',
+        duration: 30,
+        calories: 200,
+        timestamp: new Date().toISOString(),
+      };
+
+      const res = await fetch('/api/fitness/apple-watch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const serverData = await res.json();
+      // create a workout record from the returned payload (server echoes back)
+      const now = new Date();
+      const record: WorkoutRecord = {
+        id: Date.now().toString(),
+        date: now.toLocaleDateString(),
+        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: serverData.payload?.workoutType || 'Apple Watch (Bluetooth)',
+        duration: serverData.payload?.duration || 30,
+        calories: serverData.payload?.calories || 0,
+      };
+      persistHistory([...history, record]);
+    } catch (err) {
+      console.error('Bluetooth sync failed, falling back to server:', err);
+      await syncFromAppleWatch();
     }
   };
 
@@ -491,7 +590,7 @@ export default function WorkoutsPage() {
             gap: '1rem',
             marginBottom: '2rem',
           }}>
-            {Object.keys(workoutPlans).map((plan) => (
+            {Object.keys(plansState).map((plan) => (
               <button
                 key={plan}
                 onClick={() => setSelectedPlan(plan)}
@@ -518,15 +617,20 @@ export default function WorkoutsPage() {
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
             gap: '1.5rem',
           }}>
-            {workoutPlans[selectedPlan].map((workout, index) => (
+            {plansState[selectedPlan].map((workout, index) => (
               <div
                 key={index}
                 style={{
-                  backgroundColor: dayColors[index % dayColors.length],
-                  color: '#fff',
-                  padding: '1.5rem',
-                  borderRadius: '1rem',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    backgroundColor: dayColors[index % dayColors.length],
+                    color: '#fff',
+                    padding: '1.5rem',
+                    borderRadius: '16px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                    overflow: 'hidden',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
                 }}
               >
                 <h3 style={{ marginBottom: '0.5rem', fontSize: '1.3rem' }}>⚡ {workout.day}</h3>
@@ -552,17 +656,60 @@ export default function WorkoutsPage() {
                     listStyle: 'none',
                     padding: 0,
                     margin: 0,
+                    marginBottom: '0.75rem'
                   }}>
-                    {workout.exercises.map((exercise, i) => (
-                      <li key={i} style={{
-                        fontSize: '0.85rem',
-                        opacity: 0.9,
-                        marginBottom: '0.25rem',
-                      }}>
-                        ✓ {exercise}
-                      </li>
-                    ))}
+                    {workout.exercises.map((exercise, i) => {
+                      const ex: Exercise = ((): Exercise => {
+                        if (typeof exercise === 'string') {
+                          const name = exercise;
+                          // Special case: chest days with bench press default to 5 sets x 10 reps
+                          if (workout.type.toLowerCase().includes('chest') && name.toLowerCase().includes('bench')) {
+                            return { name, sets: 5, reps: '10' };
+                          }
+                          // Cardio / endurance: single set, reps N/A
+                          if (/run|cycling|rowing|cardio|sprint|distance/i.test(name)) {
+                            return { name, sets: 1, reps: 'N/A' };
+                          }
+                          // sensible default for strength movements
+                          return { name, sets: 3, reps: '8-12' };
+                        }
+                        return exercise as Exercise;
+                      })();
+
+                      return (
+                        <li key={i} className="pop-in" style={{
+                          fontSize: '0.95rem',
+                          opacity: 0.98,
+                          marginBottom: '0.45rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                        }}>
+                          <span style={{ flex: 1 }}>✓ {ex.name} {ex.sets ? `— ${ex.sets} sets` : ''} {ex.reps ? ` x ${ex.reps} reps` : ''}</span>
+                          <button
+                            onClick={() => startEditExercise(selectedPlan, index, i)}
+                            className="small btn-ghost"
+                            style={{ marginLeft: '0.5rem', background: 'transparent', color: '#fff', borderRadius: '8px' }}
+                          >
+                            Edit
+                          </button>
+                        </li>
+                      );
+                    })}
                   </ul>
+                  {editing && editing.plan === selectedPlan && editing.workoutIndex === index && (
+                    <div style={{ marginTop: '0.75rem', background: 'rgba(0,0,0,0.08)', padding: '0.75rem', borderRadius: '0.5rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <input value={editValues.name} onChange={(e) => setEditValues({ ...editValues, name: e.target.value })} style={{ flex: 2, padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #ddd' }} />
+                        <input value={editValues.sets} placeholder="Sets" onChange={(e) => setEditValues({ ...editValues, sets: e.target.value })} style={{ width: '85px', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #ddd' }} />
+                        <input value={editValues.reps} placeholder="Reps" onChange={(e) => setEditValues({ ...editValues, reps: e.target.value })} style={{ width: '100px', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #ddd' }} />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={saveEditExercise} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#10B981', color: '#fff', border: 'none', borderRadius: '0.5rem' }}>Save</button>
+                        <button onClick={cancelEditExercise} style={{ padding: '0.5rem 0.75rem', backgroundColor: '#F87171', color: '#fff', border: 'none', borderRadius: '0.5rem' }}>Cancel</button>
+                      </div>
+                    </div>
+                  )}
                   {(workout.reps || workout.sets) && (
                     <div style={{ marginTop: '1rem', opacity: 0.9, fontSize: '0.9rem' }}>
                       <p style={{ margin: 0 }}>Sets: {workout.sets || '3'}</p>
@@ -591,6 +738,20 @@ export default function WorkoutsPage() {
               }}
             >
               🔄 Sync from Apple Watch
+            </button>
+            <button
+              onClick={attemptBluetoothSync}
+              style={{
+                padding: '0.85rem 1.25rem',
+                backgroundColor: '#1E40AF',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '0.75rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              🔵 Connect via Bluetooth
             </button>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', flex: 1 }}>
               <input

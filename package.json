@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-icons": "node tools/generate-icons.js"
   },
   "dependencies": {
     "critters": "^0.0.23",
@@ -19,6 +20,7 @@
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.3.0"
   }
 }
