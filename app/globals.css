@@ -119,6 +119,18 @@ ul { padding-left: 0; }
   .homeLink, .featureCard { width: 100%; }
   .featureCard { padding: 1.5rem; }
   .card { padding: 1.25rem; }
+  .nutrition-layout { grid-template-columns: 1fr !important; }
+  .nutrition-plan-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 640px) {
+  .hero-hero { gap: 1.5rem !important; }
+  .hero-hero h2 { font-size: 2.4rem !important; }
+  .featureCard h3 { font-size: 1.3rem !important; }
+  .responsive-main { padding: 2rem 0.75rem !important; }
+  .nutrition-layout, .nutrition-plan-grid { gap: 1rem !important; }
+  .app-header { flex-direction: column; align-items: flex-start; }
+  .app-header > div:last-child { width: 100%; }
 }
 
 .warning-banner { margin-bottom: 1rem; padding: 0.8rem; border-radius: 10px; background: #FFFBEB; color: #92400E; font-weight: 600; }

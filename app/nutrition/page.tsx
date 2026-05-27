@@ -216,14 +216,15 @@ export default function NutritionPage() {
     .join(', ');
 
   return (
-    <main style={{
+    <main className="responsive-main" style={{
+      width: '100%',
       maxWidth: '1200px',
       margin: '0 auto',
       padding: '2rem',
     }}>
       <h2 style={{ marginBottom: '2rem' }}>🍎 Nutrition & Meal Plans</h2>
 
-      <div style={{
+      <div className="nutrition-layout" style={{
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
         gap: '2rem',
@@ -234,7 +235,7 @@ export default function NutritionPage() {
             Tailoring this plan for your saved goal: <strong>{savedGoal}</strong>
           </p>
           <h3 style={{ marginBottom: '1rem' }}>Select Your Plan</h3>
-          <div style={{
+          <div className="nutrition-plan-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(2, 1fr)',
             gap: '1rem',

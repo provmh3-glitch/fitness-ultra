@@ -2,10 +2,11 @@ import HeroVisual from './components/HeroVisual';
 
 export default function Home() {
   return (
-    <main style={{
+    <main className="responsive-main" style={{
+      width: '100%',
       maxWidth: '1200px',
       margin: '0 auto',
-      padding: '3rem 2rem',
+      padding: '3rem 1rem',
     }}>
       <section className="hero-hero" style={{
         display: 'grid',
